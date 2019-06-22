@@ -19,12 +19,12 @@ func init() {
 
 func main() {
 
-	mango := car{
+	honda := car{
 		Name:        "Honda",
 		Description: "This is a Japanese vehicle",
 	}
 
-	err := tpl.Execute(os.Stdout, mango)
+	err := tpl.Execute(os.Stdout, honda)
 
 	if err != nil {
 		log.Fatalln(err)

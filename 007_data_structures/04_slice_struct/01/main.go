@@ -23,8 +23,19 @@ func main() {
 		Name:        "Honda",
 		Description: "This is a Japanese vehicle",
 	}
+	mercedeze := car{
+		Name:        "Mercedeze",
+		Description: "This is a German vehicle",
+	}
+	ford := car{
+		Name:        "Ford",
+		Description: "This is an American vehicle",
+	}
 
-	err := tpl.Execute(os.Stdout, honda)
+	//defining the slice of struct
+	cars := []car{honda, mercedeze, ford}
+
+	err := tpl.Execute(os.Stdout, cars)
 
 	if err != nil {
 		log.Fatalln(err)
