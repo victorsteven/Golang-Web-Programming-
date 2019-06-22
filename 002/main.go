@@ -1,28 +1,52 @@
 package main
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"os"
-	"text/template"
+	"strings"
 )
 
 func main() {
-	tpl, err := template.ParseFiles("tpl.gohtml")
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	// name := "Steven Victor"
+	// tp := `
+	// 	<!DOCTYPE html>
+	// 	<html lang="en">
+	// 	<head>
+	// 		<meta charset="UTF-8">
+	// 		<title>Hello Dear!</title>
+	// 	</head>
+	// 	<body>
+	// 		<h1>` + name + `</h1>
+	// 	</body>
+	// 	</html>
+	// `
+	// fmt.Println(tp)
+
+	// name := os.Args[1]
+	name := "Agu Mark"
+	// fmt.Println(os.Args[0])
+	// fmt.Println(os.Args[1])
+	str := fmt.Sprint(`
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<title>Hello Dear!</title>
+		</head>
+		<body>
+			<h1>` + name + `</h1>
+		</body>
+		</html>
+	`)
 	nf, err := os.Create("index.html")
 	if err != nil {
-		log.Println("error creating file", err)
+		log.Fatal("error creating the file", err)
 	}
 	defer nf.Close()
 
-	// err = tpl.Execute(os.Stdout, nil)
-	//Execute takes a Writer and data
-	err = tpl.Execute(nf, nil)
-
-	if err != nil {
-		log.Fatalln(err)
-	}
+	//takes in a writer and a reader
+	io.Copy(nf, strings.NewReader(str))
 }

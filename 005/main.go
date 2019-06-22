@@ -1,16 +1,23 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"os"
-	"text/template"
 )
 
-func main() {
-	tpl, err := template.ParseFiles("one.gmao")
+var tpl *template.Template
 
+func init() {
+	tpl = template.Must(template.ParseGlob("*.gmao"))
+
+}
+
+func main() {
+
+	err := tpl.Execute(os.Stdout, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	err = tpl.Execute(os.Stdout, nil)
 	if err != nil {
@@ -21,11 +28,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	err = tpl.ExecuteTemplate(os.Stdout, "two.gmao", nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = tpl.ExecuteTemplate(os.Stdout, "one.gmao", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}

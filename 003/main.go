@@ -7,25 +7,21 @@ import (
 )
 
 func main() {
-	tpl, err := template.ParseFiles("one.gmao")
+	tpl, err := template.ParseFiles("tpl.gohtml")
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = tpl.Execute(os.Stdout, nil)
+	nf, err := os.Create("index.html")
 	if err != nil {
-		log.Fatalln(err)
+		log.Println("error creating file", err)
 	}
+	defer nf.Close()
 
-	err = tpl.ExecuteTemplate(os.Stdout, "three.gmao", nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = tpl.ExecuteTemplate(os.Stdout, "two.gmao", nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = tpl.ExecuteTemplate(os.Stdout, "one.gmao", nil)
+	// err = tpl.Execute(os.Stdout, nil)
+	//Execute takes a Writer and data
+	err = tpl.Execute(nf, nil)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
