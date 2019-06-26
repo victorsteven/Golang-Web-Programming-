@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <title>Composition</title>
+</head>
+
+<body>
+{/* we did type promotion here */}
+  <h1>{{ .Name }}</h1>
+  <h2>{{ .Age }}</h2>
+  {{if .LicenseToKill}}
+  <h3>License to kill </h3>
+  {{else}}
+  <h3>Not Licensed </h3>
+  {{end}}
+
+</body>
+</html>
