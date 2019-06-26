@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 func main() {
@@ -14,25 +15,32 @@ func main() {
 	}
 	defer li.Close()
 
+	//Eternally loop through the listener
+
 	for {
 		conn, err := li.Accept()
 		if err != nil {
 			log.Println(err)
 		}
-		//launching a Go routine
 		go handle(conn)
 	}
 }
 
 func handle(conn net.Conn) {
+	err := conn.SetDeadline(time.Now().Add(10 * time.Second))
+	if err != nil {
+		log.Println("Conn timeout")
+	}
 	scanner := bufio.NewScanner(conn)
 
 	for scanner.Scan() {
 		ln := scanner.Text()
 		fmt.Println(ln)
+		fmt.Fprintf(conn, "I have it: %s\n", ln)
 	}
 
 	defer conn.Close()
 
-	fmt.Println("We wont get here")
+	fmt.Println("We are not getting here")
+
 }

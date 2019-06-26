@@ -14,12 +14,13 @@ func main() {
 	}
 	defer li.Close()
 
+	//Eternally loop through the listener
+
 	for {
 		conn, err := li.Accept()
 		if err != nil {
 			log.Println(err)
 		}
-		//launching a Go routine
 		go handle(conn)
 	}
 }
@@ -30,9 +31,11 @@ func handle(conn net.Conn) {
 	for scanner.Scan() {
 		ln := scanner.Text()
 		fmt.Println(ln)
+		fmt.Fprintf(conn, "I have it: %s\n", ln)
 	}
 
 	defer conn.Close()
 
-	fmt.Println("We wont get here")
+	fmt.Println("We are not getting here")
+
 }
