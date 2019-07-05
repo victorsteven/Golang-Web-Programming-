@@ -4,16 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Bar</title>
+  <title>Document</title>
 </head>
 <body>
-  <h1>Welcome to the bar.</h1>
 
   {{if .First}}
     Username: {{.UserName}}<br>
     Password: {{.Password}}<br>
     First {{.First}} <br>
     Last {{.Last}} <br>
+
+  {{else}}
+  <h2><a href="/signup">Sign up</a></h2>
   {{end}}
+  
+  <br>
+  <h2><a href="/bar">The bar</a></h2>
 </body>
 </html>
