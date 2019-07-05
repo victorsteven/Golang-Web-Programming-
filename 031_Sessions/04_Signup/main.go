@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -17,15 +18,26 @@ type user struct {
 	Role     string
 }
 
+type session struct {
+	un           string
+	lastActivity time.Time
+}
+
 var tpl *template.Template
 var dbUsers = map[string]user{}
-var dbSessions = map[string]string{}
+var dbSessionsCleaned time.Time
+
+const sessionLength int = 30
+
+// var dbSessions = map[string]string{}
+var dbSessions = map[string]session{}
 
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
 	bs, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
 	//this is like a seeder file
 	dbUsers["victorsteven"] = user{"victorsteven", bs, "Victor", "Steven", "007"}
+	dbSessionsCleaned = time.Now()
 }
 
 func main() {
@@ -45,7 +57,7 @@ func index(res http.ResponseWriter, req *http.Request) {
 
 func bar(res http.ResponseWriter, req *http.Request) {
 	u := getUser(res, req)
-	if !alreadyLoggedIn(req) {
+	if !alreadyLoggedIn(res, req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -57,7 +69,7 @@ func bar(res http.ResponseWriter, req *http.Request) {
 }
 
 func signup(res http.ResponseWriter, req *http.Request) {
-	if alreadyLoggedIn(req) {
+	if alreadyLoggedIn(res, req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -81,8 +93,9 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			Name:  "session",
 			Value: sID.String(),
 		}
+		c.MaxAge = sessionLength
 		http.SetCookie(res, c)
-		dbSessions[c.Value] = un
+		dbSessions[c.Value] = session{un, time.Now()}
 
 		//store user in dbUsers:
 		//turn the password into a slice of byte
@@ -103,7 +116,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 }
 
 func login(res http.ResponseWriter, req *http.Request) {
-	if alreadyLoggedIn(req) {
+	if alreadyLoggedIn(res, req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -131,7 +144,7 @@ func login(res http.ResponseWriter, req *http.Request) {
 			Value: sID.String(),
 		}
 		http.SetCookie(res, c)
-		dbSessions[c.Value] = un
+		dbSessions[c.Value] = session{un, time.Now()}
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -139,7 +152,7 @@ func login(res http.ResponseWriter, req *http.Request) {
 }
 
 func logout(res http.ResponseWriter, req *http.Request) {
-	if !alreadyLoggedIn(req) {
+	if !alreadyLoggedIn(res, req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -154,5 +167,11 @@ func logout(res http.ResponseWriter, req *http.Request) {
 		MaxAge: -1, //delete the cookie now
 	}
 	http.SetCookie(res, c)
+
+	//clean up dbSessions
+	//substract the time our program started from the current time, and checked if it is greated than 30 seconds, if yes, remove the session
+	if time.Now().Sub(dbSessionsCleaned) > (time.Second * 30) {
+		go CleanSessions()
+	}
 	http.Redirect(res, req, "/login", http.StatusSeeOther)
 }
