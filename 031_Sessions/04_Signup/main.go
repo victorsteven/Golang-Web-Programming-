@@ -14,6 +14,7 @@ type user struct {
 	Password []byte
 	First    string
 	Last     string
+	Role     string
 }
 
 var tpl *template.Template
@@ -23,7 +24,8 @@ var dbSessions = map[string]string{}
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
 	bs, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
-	dbUsers["victorsteven"] = user{"victorsteven", bs, "Victor", "Steven"}
+	//this is like a seeder file
+	dbUsers["victorsteven"] = user{"victorsteven", bs, "Victor", "Steven", "007"}
 }
 
 func main() {
@@ -47,6 +49,10 @@ func bar(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
+	if u.Role != "007" {
+		http.Error(res, "You must be 007 to enter the bar", http.StatusForbidden)
+		return
+	}
 	tpl.ExecuteTemplate(res, "bar.gohtml", u)
 }
 
@@ -61,6 +67,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 		p := req.FormValue("password")
 		f := req.FormValue("firstname")
 		l := req.FormValue("lastname")
+		r := req.FormValue("role")
 
 		//username taken:
 		if _, ok := dbUsers[un]; ok {
@@ -84,7 +91,8 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		u := user{un, bs, f, l}
+		u := user{un, bs, f, l, r}
+		//storing this user in the database of users
 		dbUsers[un] = u
 
 		//redirect
